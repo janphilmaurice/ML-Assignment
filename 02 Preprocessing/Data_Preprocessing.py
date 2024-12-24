@@ -1,6 +1,6 @@
 #  Script for data cleaning and initial preprocessing
 # Responsible: Maria
-
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -142,9 +142,9 @@ def plot(df, columns):
             print(f"Column '{column}' not found in DataFrame.")
 
 # File Path
-
-input_file = "/Users/mdelaluz/Documents/MSC KIDS UCL/Foundations of Machine Learning/Assessment/ML-Assignment/01 Data/Master_Data.csv"
-output_file = "/Users/mdelaluz/Documents/MSC KIDS UCL/Foundations of Machine Learning/Assessment/ML-Assignment/01 Data/Master_Data_Preprocessed.csv"
+current_dir = os.path.dirname(os.path.abspath(__file__))
+input_file = os.path.join(current_dir, "../01 Data/Master_Data.csv")
+output_file = os.path.join(current_dir, "../01 Data/Master_Data_Preprocessed.csv")
 preprocess_csv(input_file, output_file)
 
 print("Ready!")
@@ -153,7 +153,7 @@ df = pd.read_csv(output_file)
 total_count = df['Interest_Rate'].shape[0]
 count_greater_than_100 = df[df['Interest_Rate'] > 40].shape[0]
 print(f'Total count is: {total_count} and greater than 40 is {count_greater_than_100}')
-columns_to_plot = ['Num_Bank_Accounts', 'Num_Credit_Card', 'Interest_Rate', 'Num_of_Loan', 'Delay_from_due_date', 'Num_of_Delayed_Payment', 'Changed_Credit_Limit', 'Num_Credit_Inquiries', 'Outstanding_Debt', 'Credit_Utilization_Ratio' ]
-plot(df, columns_to_plot)
+# columns_to_plot = ['Num_Bank_Accounts', 'Num_Credit_Card', 'Interest_Rate', 'Num_of_Loan', 'Delay_from_due_date', 'Num_of_Delayed_Payment', 'Changed_Credit_Limit', 'Num_Credit_Inquiries', 'Outstanding_Debt', 'Credit_Utilization_Ratio' ]
+# plot(df, columns_to_plot)
 
-print("Charts Ready!")
+# print("Charts Ready!")

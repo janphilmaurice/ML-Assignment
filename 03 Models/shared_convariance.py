@@ -277,4 +277,4 @@ def get_acc(pred,target):
 predicts = shared_covariance_model_predict(
       inputs, pi, mean0, mean1, covmtx)
 
-print('The accuraacy of logistic regression is:',get_acc(predicts,targets))
+print('The accuraacy of shared convariance regression is:',get_acc(predicts,targets))

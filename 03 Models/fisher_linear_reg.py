@@ -1,12 +1,13 @@
 import numpy as np
 from fomlads.plot.evaluations import plot_roc
 
-from fomlads.model.classification import shared_covariance_model_fit
-from fomlads.model.classification import shared_covariance_model_predict
-
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from fomlads.model.classification import project_data
+from fomlads.model.classification import maximum_separation_projection
+
+from fomlads.model.classification import fisher_linear_discriminant_projection
 
 def preprocess_csv(input_file, output_file):
     # Load the data from the input CSV file
@@ -229,52 +230,95 @@ for class_id, class_name in enumerate(classes):
     is_class = (class_values == class_name)
     targets[is_class] = class_id
 
-# print("targets = %r" % (targets,))
-
-# We're going to assume that all our inputs are real numbers (or can be
-# represented as such), so we'll convert all these columns to a 2d numpy
-# array object
 inputs = dataframe1[input_cols].values
 print('Return:', inputs, targets, input_cols, classes)
 
+def get_projection_weights(inputs, targets, method):
+    """
+    Helper function for project_and_histogram_data
+    Takes input and target data for classification and projects
+    this down onto 1 dimension according to the given method
 
-def fit_and_plot_roc_generative(inputs, targets, fig_ax=None, colour=None):  # draw shared covariance ROC curve
-    pi, mean0, mean1, covmtx = shared_covariance_model_fit(inputs, targets)
-    thresholds = np.linspace(0, 1, 101)
+    parameters
+    ----------
+    inputs - a 2d input matrix (array-like), each row is a data-point
+    targets - 1d target vector (array-like) -- can be at most 2 classes ids
+        0 and 1
+    returns
+    -------
+    weights - the projection vector
+    """
+    if len(np.unique(targets)) > 2:
+        raise ValueError("This method only supports data with two classes")
+    if method == 'maximum_separation':
+        weights = maximum_separation_projection(inputs, targets)
+    elif method == 'fisher':
+        weights = fisher_linear_discriminant_projection(inputs, targets)
+    else:
+        raise ValueError("Unrecognised projection method")
+    return weights
+def construct_and_plot_roc(
+        inputs, targets, method='maximum_separation', **kwargs):
+    """
+    Takes input and target data for classification and projects
+    this down onto 1 dimension according to the given method,
+    then plots roc curve for the data.
+
+    parameters
+    ----------
+    inputs - a 2d input matrix (array-like), each row is a data-point
+    targets - 1d target vector (array-like) -- can be at most 2 classes ids
+        0 and 1
+    """
+    weights = get_projection_weights(inputs, targets, method)
+    projected_inputs = project_data(inputs, weights)
+    new_ordering = np.argsort(projected_inputs)
+    projected_inputs = projected_inputs[new_ordering]
+    targets = np.copy(targets[new_ordering])
     N = targets.size
-    num_neg = np.sum(1 - targets)  # negative
-    num_pos = np.sum(targets)  # positive
-    false_positive_rates = np.empty(thresholds.size)
-    true_positive_rates = np.empty(thresholds.size)
-
-    for i, threshold in enumerate(thresholds):
-        predicts = shared_covariance_model_predict(
-            inputs, threshold, mean0, mean1, covmtx)
-        num_false_positives = np.sum((predicts == 1) & (targets == 0))
-        num_true_positives = np.sum((predicts == 1) & (targets == 1))
-        false_positive_rates[i] = np.sum(num_false_positives) / num_neg
-        true_positive_rates[i] = np.sum(num_true_positives) / num_pos
+    num_neg = np.sum(1-targets)
+    num_pos = np.sum(targets)
+    false_positive_rates = np.empty(N)
+    true_positive_rates = np.empty(N)
+    for i in range(projected_inputs.size):
+        false_positive_rates[i] = np.sum(1-targets[i:])/num_neg
+        true_positive_rates[i] = np.sum(targets[i:])/num_pos
     fig, ax = plot_roc(
-        false_positive_rates, true_positive_rates, fig_ax=fig_ax, colour=colour)
-    # and for the class prior we learnt from the model
-    predicts = shared_covariance_model_predict(
-        inputs, pi, mean0, mean1, covmtx)
-    fpr = np.sum((predicts == 1) & (targets == 0)) / num_neg
-    tpr = np.sum((predicts == 1) & (targets == 1)) / num_pos
-    ax.plot([fpr], [tpr], 'rx', markersize=8, markeredgewidth=2)
-    return fig, ax
+        false_positive_rates, true_positive_rates, label=method, **kwargs)
+    ### start of solution to Ex. 7.5 b)
+    accuracies, f1scores = get_accuracies_and_f1scores(projected_inputs, targets)
+    bestacci = np.argmax(accuracies)
+    print('The accuraacy of fisher linear regression is:', accuracies[bestacci])
+    ax.plot(false_positive_rates[bestacci], true_positive_rates[bestacci], '+c', ms=8)
+    bestf1i = np.argmax(f1scores)
+    ax.plot(false_positive_rates[bestf1i], true_positive_rates[bestf1i], 'xr', ms=8)
+    ### end of solution to Ex. 7.5 b)
+    return fig, ax,accuracies, f1scores
 
+### Ex. 7.5 b) solution
+def get_accuracies_and_f1scores(projected_inputs, targets):
+    """
+    Helper function for Ex. 7.5 b) solution
+    """
+    N = targets.size
+    accuracies = np.zeros(N)
+    f1scores = np.zeros(N)
+    for i, thresh in enumerate(projected_inputs):
+        positive_preds = (projected_inputs >= thresh)
+        true_positives = (positive_preds * targets)
+        true_negatives = ((1-positive_preds) * (1-targets))
+        N1 = np.sum(targets)
+        Nhat1 = np.sum(positive_preds)
+        accuracies[i] = np.sum(true_positives+true_negatives)/N
+        recall = np.sum(true_positives)/N1
+        precision = np.sum(true_positives)/Nhat1
+        if (precision > 0) and (recall>0):
+            f1scores[i] = 2*recall*precision/(recall+precision)
+    return accuracies, f1scores
 
-fit_and_plot_roc_generative(inputs, targets, colour='g')
-
-pi, mean0, mean1, covmtx = shared_covariance_model_fit(inputs, targets)
-def get_acc(pred,target):
-    correct_predictions = np.sum(pred == target)  # Number of correct predictions
-    total_predictions = target.size  # Number of total predictions
-    accuracy = correct_predictions / total_predictions
-    return accuracy
-
-predicts = shared_covariance_model_predict(
-      inputs, pi, mean0, mean1, covmtx)
-
-print('The accuraacy of shared convariance regression is:',get_acc(predicts,targets))
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1)
+fig_ax = (fig, ax)
+_,_,acc,f1 = construct_and_plot_roc(
+    inputs, targets, method='fisher', colour='b', fig_ax=(fig,ax))
+ax.legend()

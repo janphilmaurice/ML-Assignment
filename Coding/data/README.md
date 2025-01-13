@@ -1,8 +1,3 @@
-Descriptions of datasets and class imbalance details
-Resp: Mary
-
-From Assessment file: **You must submit the code that you use for the preprocessing** and describe how to rerun this on the original dataset as part of your code submission
-
 # Data Preprocessing
 
 The original file is **Master_Data.csv**, and the preprocessing focuses on three main tasks:  

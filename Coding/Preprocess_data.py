@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import argparse
 
 def preprocess_csv(input_file, output_file):
     # Load the data from the input CSV file

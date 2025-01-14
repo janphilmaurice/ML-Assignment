@@ -16,7 +16,7 @@ def plt_hyper_comb(data):
     fig, axs = plt.subplots(1, 1, figsize=(8, 6))
     labels = range(0, len(data), 1)
 
-    acc = [round(x, 2) for x in data]
+    acc = [round(x, 3) for x in data]
 
     bars = axs.bar(labels, acc, alpha=0.6)
     axs.plot(labels, acc, label="Mean Reliability", marker="s")

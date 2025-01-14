@@ -1,5 +1,6 @@
 import os
 import time
+import argparse
 
 from Preprocess_data import preprocess_csv, split_Xy
 from create_derived_data import split_data
@@ -11,16 +12,22 @@ from figure import plt_err_with_bestHyper, plt_hyper_comb, plt_acc_imbalance, pl
 def main():
     start_time = time.time()
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input_file", help="Path to the data file (e.g., CSV).", default = '/data/train.csv')
+   
+    args = parser.parse_args()
+
+
+
     current_dir = os.getcwd()
-    input_file = os.path.join(current_dir, "data/train.csv")  # change data path here
     output_file = os.path.join(current_dir, "data/train_Preprocessed.csv")
     print('Start preprocessing!\n')
-    preprocessed_data = preprocess_csv(input_file, output_file)
-    #print(preprocessed_data.isnull().any())
+    preprocessed_data = preprocess_csv(args.input_file, output_file)
+
 
     column='Binary_Credit_Score'
     balanced_data = split_data(preprocessed_data,column,rate=(0.5,0.5),num=5000)
-    #print(balanced_data.isnull().any())
+
 
     # get balanced version
     balanced_X, balanced_y = split_Xy(balanced_data, column)
@@ -48,22 +55,20 @@ def main():
     print('Start using strategy to sample data!\n')
     # set the degree of imbalance
     rates = [(0.1,0.9),(0.2,0.8),(0.3,0.7),(0.4,0.6),(0.5,0.5),(0.6,0.4),(0.7,0.3),(0.8,0.2),(0.9,0.1)]
-    stretegy = oversample()
-    oversample_accs = check_imbalance(best_params[0], strategy=stretegy,
+    print('Test oversampling!')
+    oversample_accs = check_imbalance(best_params[0], strategy=oversample,
                     data=preprocessed_data, rates=rates)
 
-    stretegy = undersample()
-    undersample_accs = check_imbalance(best_params[0], strategy=stretegy,
+    print('Test undersampling!')
+    undersample_accs = check_imbalance(best_params[0], strategy=undersample,
                     data=preprocessed_data, rates=rates)
 
-    stretegy = smote()
-    smote_accs = check_imbalance(best_params[0], strategy=stretegy,
+    print('Test smote!')
+    smote_accs = check_imbalance(best_params[0], strategy=smote,
                     data=preprocessed_data, rates=rates)
 
     plt_s_avg([oversample_accs, undersample_accs, smote_accs])
     plt_acc_imbalance([oversample_accs, undersample_accs, smote_accs])
-
-
 
     end_time = time.time()
 

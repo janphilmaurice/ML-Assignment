@@ -51,4 +51,4 @@
 ## Running Experiments
 
 1. **Preprocess Data**:
-   python Coding/Main.py
+   python Coding/Main.py <DATA FILE>

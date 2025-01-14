@@ -3,20 +3,20 @@ import time
 
 from Preprocess_data import preprocess_csv, split_Xy
 from create_derived_data import split_data
-from cross_validation import grid_search, initializeMLP_with_bestHyper
+from cross_validation import grid_search
 from Sampling_strategy import oversample, undersample, smote, check_imbalance
+from figure import plt_err_with_bestHyper, plt_hyper_comb, plt_acc_imbalance, plt_s_avg
 
 
 def main():
     start_time = time.time()
 
     current_dir = os.getcwd()
-    input_file = os.path.join(current_dir, "data/Master_Data.csv")  # change data path here
-    output_file = os.path.join(current_dir, "data/Master_Data_Preprocessed.csv")
+    input_file = os.path.join(current_dir, "data/train.csv")  # change data path here
+    output_file = os.path.join(current_dir, "data/train_Preprocessed.csv")
     print('Start preprocessing!\n')
     preprocessed_data = preprocess_csv(input_file, output_file)
     #print(preprocessed_data.isnull().any())
-    #print(preprocessed_data['Binary_Credit_Score'])
 
     column='Binary_Credit_Score'
     balanced_data = split_data(preprocessed_data,column,rate=(0.5,0.5),num=5000)
@@ -35,27 +35,35 @@ def main():
 
     # Perform grid search
 
-    best_params = grid_search(balanced_X, balanced_y, param_grid, num_folds=5)
+    best_params, hyper_accs = grid_search(balanced_X, balanced_y, param_grid, num_folds=5)
+    plt_hyper_comb(hyper_accs)
     print('Finish grid search!\n')
 
     ## using strategy to train mlp
     # initialize model
-    mlp = initializeMLP_with_bestHyper(best_params[0], balanced_X, balanced_y)
 
-    # set the degree of imbalance
+    print('Draw the error plot of training with best hyperparameter\n')
+    plt_err_with_bestHyper(best_params[0], balanced_X, balanced_y)
+
     print('Start using strategy to sample data!\n')
-    rates = [(0.3,0.7),(0.2,0.8),(0.5,0.5),(0.8,0.2),(0.7,0.3)]
+    # set the degree of imbalance
+    rates = [(0.1,0.9),(0.2,0.8),(0.3,0.7),(0.4,0.6),(0.5,0.5),(0.6,0.4),(0.7,0.3),(0.8,0.2),(0.9,0.1)]
     stretegy = oversample()
-    check_imbalance(strategy=stretegy,
-                    data=preprocessed_data, rates=rates, model=mlp)
+    oversample_accs = check_imbalance(best_params[0], strategy=stretegy,
+                    data=preprocessed_data, rates=rates)
 
     stretegy = undersample()
-    check_imbalance(strategy=stretegy,
-                    data=preprocessed_data, rates=rates, model=mlp)
+    undersample_accs = check_imbalance(best_params[0], strategy=stretegy,
+                    data=preprocessed_data, rates=rates)
 
     stretegy = smote()
-    check_imbalance(strategy=stretegy,
-                    data=preprocessed_data, rates=rates, model=mlp)
+    smote_accs = check_imbalance(best_params[0], strategy=stretegy,
+                    data=preprocessed_data, rates=rates)
+
+    plt_s_avg([oversample_accs, undersample_accs, smote_accs])
+    plt_acc_imbalance([oversample_accs, undersample_accs, smote_accs])
+
+
 
     end_time = time.time()
 

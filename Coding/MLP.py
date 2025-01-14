@@ -343,10 +343,35 @@ class MLP(object):
                 file.write("Error at epoch {} is {}.\n".format(i + 1, self.errs[i]))
 
     def show_error_plot(self):
-        plt.plot([i for i in range(len(self.errs))], self.errs)
-        plt.xlabel("Epoch")
-        plt.ylabel("Error")
-        plt.show()
+        plt.style.use('seaborn')
+
+        plt.figure(figsize=(8, 6))  # set size
+
+        # draw error plot
+        plt.plot(
+            range(len(self.errs)),  # X-axis
+            self.errs,  # Y-axis
+            #marker='o',
+            color='blue',
+            linestyle='-',
+            linewidth=2,
+            markersize=5,
+            label='Error'
+        )
+
+        plt.xlabel("Epoch", fontsize=12)
+        plt.ylabel("Error", fontsize=12)
+        plt.title("Error Graph", fontsize=14)
+
+        # set grid
+        plt.grid(True, linestyle='--', alpha=0.7)
+
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(
+            "err_fig.svg",
+            format="svg")
+        plt.show(block=False)
 
     def compute_accuracy(self):
         y_pre = self.predict(self.X, True)

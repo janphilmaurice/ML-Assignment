@@ -55,7 +55,7 @@ def grid_search(X, y, param_grid, num_folds=5):
     # Return best parameters and their performance
     best_params = max(results, key=lambda x: x[1])
     print(f"Best Parameters: {best_params[0]} with Accuracy: {best_params[1]}")
-    return best_params
+    return best_params, list(map(lambda x: x[1], results))
 
 def initializeMLP_with_bestHyper(best_params, X, y):
     optimizer_class = Adam  # params["optimizer"]
@@ -68,7 +68,7 @@ def initializeMLP_with_bestHyper(best_params, X, y):
     }
 
     #keys, values = zip(*param_grid.items())
-    # 使用 ParameterGrid 生成所有参数组合
+    # Generate all parameter combinations using ParameterGrid
     param_combinations = list(ParameterGrid(param_grid))
 
     for params in param_combinations:

@@ -30,7 +30,7 @@ def main():
     print('Finish preprocessing!\n')
 
     # set hyperparam we want to test
-    print('Start grid search!\n')
+    print('Step2 Start grid search!\n')
     param_grid = {
         "NHs": [[32], [64, 32], [128, 64, 32]],  # Hidden layer configurations
         "lr": [0.01, 0.001],  # Learning rates
@@ -49,7 +49,7 @@ def main():
     print('Draw the error plot of training with best hyperparameter\n')
     plt_err_with_bestHyper(best_params[0], balanced_X, balanced_y)
 
-    print('Start using strategy to sample data!\n')
+    print('Step3 Start using strategy to sample data!\n')
     # set the degree of imbalance
     rates = [(0.1,0.9),(0.2,0.8),(0.3,0.7),(0.4,0.6),(0.5,0.5),(0.6,0.4),(0.7,0.3),(0.8,0.2),(0.9,0.1)]
     print('Test oversampling!')

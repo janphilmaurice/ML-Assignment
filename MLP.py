@@ -269,7 +269,7 @@ class MLP(object):
 
 
     def show_error_plot(self):
-        plt.style.use('seaborn')
+        #plt.style.use('seaborn')
 
         plt.figure(figsize=(8, 6))  # set size
 
@@ -285,9 +285,9 @@ class MLP(object):
             label='Error'
         )
 
-        plt.xlabel("Epoch", fontsize=12)
-        plt.ylabel("Error", fontsize=12)
-        plt.title("Error Graph", fontsize=14)
+        plt.xlabel("Epoch")
+        plt.ylabel("Error")
+        plt.title("Error Graph")
 
         # set grid
         plt.grid(True, linestyle='--', alpha=0.7)

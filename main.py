@@ -1,4 +1,3 @@
-import time
 import argparse
 
 from Preprocess_data import preprocess_csv, split_Xy
@@ -9,8 +8,6 @@ from figure import plt_err_with_bestHyper, plt_hyper_comb, plt_acc_imbalance, pl
 
 
 def main():
-    start_time = time.time()
-
     parser = argparse.ArgumentParser()
     parser.add_argument("input_file", help="Path to the data file (e.g., CSV).", default = 'data/Master_data.csv')
    
@@ -67,11 +64,6 @@ def main():
     plt_s_avg([oversample_accs, undersample_accs, smote_accs])
     plt_acc_imbalance([oversample_accs, undersample_accs, smote_accs])
 
-    end_time = time.time()
-
-    # calculate time
-    elapsed_time = end_time - start_time
-    print(f"Program time:: {elapsed_time:.2f} s")
 
 if __name__ == '__main__':
     main()

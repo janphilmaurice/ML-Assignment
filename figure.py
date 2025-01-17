@@ -20,14 +20,14 @@ def plt_hyper_comb(data):
 
     bars = axs.bar(labels, acc, alpha=0.6)
     axs.plot(labels, acc, label="Mean Reliability", marker="s")
-    axs.set_title("Combination of hyperparameter", fontsize=14, fontweight='bold')
+    axs.set_title("Combination of hyperparameter")
     axs.spines['top'].set_linewidth(2)
     axs.spines['right'].set_linewidth(2)
     axs.spines['bottom'].set_linewidth(2)
     axs.spines['left'].set_linewidth(2)
     axs.set_xlabel("Set of combination")
     axs.set_ylabel("Accuracy")
-    axs.set_xticks(labels, fontsize=20, color='#333')
+    axs.set_xticks(labels, color='#333')
     axs.set_ylim(0.5, 0.85)
 
     for bar in bars:
@@ -86,13 +86,13 @@ def plt_s_avg(datas):
     # subplot1
     bars = axs.bar(labels, value, alpha=0.6, color="green")
     #axs.plot(labels, s_avg_acc, label="Mean Reliability", color="green", marker="s")
-    axs.set_title("Average accuracy of strategy",fontsize=14, fontweight='bold')
+    axs.set_title("Average accuracy of strategy")
     axs.spines['top'].set_linewidth(1)
     axs.spines['right'].set_linewidth(1)
     axs.spines['bottom'].set_linewidth(2)
     axs.spines['left'].set_linewidth(2)
     axs.set_ylabel("Accuracy")
-    axs.set_xticks(labels, fontsize=20, color='#333')
+    axs.set_xticks(labels, color='#333')
     axs.set_ylim(0.8,1)
 
     for bar in bars:
